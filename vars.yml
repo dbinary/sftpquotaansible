@@ -1,0 +1,9 @@
+---
+sftpgroup: sftp_users
+ssh_config: /etc/ssh/sshd_config
+jail_path: /home
+username: user01
+comments: "user01"
+user_shell: /sbin/nologin
+pwd: "{{ 'mypass#' | password_hash('sha512', 'random_SALT_2b9JgY2xDc') }}"
+quota: "5m"

@@ -1,0 +1,33 @@
+---
+- name: Configure RHEL 7.X for sftp with chroot
+  hosts: all
+  vars_files: vars.yml
+  tasks:
+    - name: Configure sshd_config
+      replace:
+        path: "{{ ssh_config }}"
+        regexp: '^Subsystem.*sftp-server'
+        replace: 'Subsystem sftp internal-sftp'
+        backup: true
+      notify: restart sshd
+    - name: Adding configuration for jail on {{ jail_path }}
+      blockinfile:
+        path: "{{ ssh_config }}"
+        block: |
+          Match Group {{ sftpgroup }}
+          X11Forwarding no
+          AllowTcpForwarding no
+          ChrootDirectory {{ jail_path }}
+          ForceCommand internal-sftp
+        backup: true
+      notify: restart sshd
+    - name: Create group {{ sftpgroup }}
+      group:
+        name: "{{ sftpgroup }}"
+        state: present
+  handlers:
+    - name: restart sshd
+      systemd:
+        name: sshd
+        state: restarted
+        enabled: true

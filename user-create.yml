@@ -1,0 +1,19 @@
+---
+- name: Playbook for configure users sftp
+  hosts: all
+  vars_files: vars.yml
+  tasks:
+    - name: Adding user {{ username }}
+      user:
+        name: "{{ username }}"
+        comment: "{{ comments }}"
+        groups: "{{ sftpgroup }}"
+        append: true
+        shell: "{{ user_shell }}"
+        create_home: true
+        password: "{{ pwd }}"
+    - name: Set User quota to {{ quota }}
+      command: >
+        xfs_quota -x -c 'limit -u bsoft={{ quota }}
+        bhard={{ quota }} {{ username }}' {{ jail_path }}
+      changed_when: false
